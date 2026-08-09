@@ -7,6 +7,7 @@ const memberService = new MemberService();
 
 adminController.goHome = (req: Request, res: Response) => {
     try {
+        console.log("goHome");
         res.send("Home Page");
 
     } catch (err) {
@@ -17,6 +18,7 @@ adminController.goHome = (req: Request, res: Response) => {
 
 adminController.getLogin = (req: Request, res: Response) => {
     try {
+        console.log("getLogin");
         res.send("Login Page");
 
     } catch (err) {
@@ -27,6 +29,7 @@ adminController.getLogin = (req: Request, res: Response) => {
 
 adminController.getSignup = (req: Request, res: Response) => {
     try {
+        console.log("getSignup");
         res.send("Signup Page");
 
     } catch (err) {
