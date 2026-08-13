@@ -3,7 +3,7 @@ import { T } from "../libs/types/common";
 import MemberService from "../models/Member.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
-import { Message } from "../libs/Errors";
+import Errors, { Message } from "../libs/Errors";
 
 const adminController: T = {};
 const memberService = new MemberService();
@@ -15,17 +15,7 @@ adminController.goHome = (req: Request, res: Response) => {
 
     } catch (err) {
         console.log("Error, goHome:", err);
-    }
-
-};
-
-adminController.getLogin = (req: Request, res: Response) => {
-    try {
-        console.log("getLogin");
-        res.render("login");
-
-    } catch (err) {
-        console.log("Error, getLogin:", err);
+        res.redirect("/admin")
     }
 
 };
@@ -37,23 +27,7 @@ adminController.getSignup = (req: Request, res: Response) => {
 
     } catch (err) {
         console.log("Error, getSignup:", err);
-    }
-
-};
-
-adminController.processLogin = async (req: AdminRequest, res: Response) => {
-    try {
-        console.log("processLogin");
-        const input: LoginInput = req.body;
-
-        const result = await memberService.processLogin(input);
-        req.session.member = result;
-        req.session.save(function () {
-            res.send(result);
-        });
-    } catch (err) {
-        console.log("Error, processLogin:", err);
-        res.send( err);
+        res.redirect("/admin")
     }
 
 };
@@ -72,7 +46,63 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
         });
     } catch (err) {
         console.log("Error, processSignup:", err);
-        res.send(err);
+        const message =
+            err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+        res.send(
+            `<script>alert('${message}'); window.location.replace('/admin/signup');</script>`
+        );
+    }
+
+};
+
+adminController.getLogin = (req: Request, res: Response) => {
+    try {
+        console.log("getLogin");
+        res.render("login");
+
+    } catch (err) {
+        console.log("Error, getLogin:", err);
+        res.redirect("/admin")
+    }
+
+};
+
+
+adminController.processLogin = async (req: AdminRequest, res: Response) => {
+    try {
+        console.log("processLogin");
+        console.log("body:", req.body);
+        const input: LoginInput = req.body;
+
+        const result = await memberService.processLogin(input);
+        // TODO: SESSION AUTHENTICATION
+
+        req.session.member = result;
+        req.session.save(function () {
+            res.send(result);
+        });
+    } catch (err) {
+        console.log("Error, processLogin:", err);
+        const message =
+            err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+        res.send(
+            `<script>alert('${message}'); window.location.replace('/admin/login');</script>`
+        );
+
+    }
+
+};
+
+
+adminController.logout = async (req: AdminRequest, res: Response) => {
+    try {
+        console.log("logout");
+        req.session.destroy(function () {
+            res.redirect("/admin");
+        });
+    } catch (err) {
+        console.log("Error, logout:", err);
+        res.redirect("/admin");
     }
 
 };
