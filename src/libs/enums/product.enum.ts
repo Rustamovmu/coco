@@ -30,11 +30,8 @@ export enum ProductStatus {
 
 
 export enum ProductCollection {
-    T_SHIRT = "T-SHIRT",
-    SHORTS = "SHORTS",
-    SHIRTS = "SHIRTS",
-    HOODIES = "HOODIES",
-    JEANS = "JEANS",
+    CLOTHE = "CLOTHE",
+    PANTS = "PANTS",
     HAT = "HAT",
     SHOES = "SHOES",
     OTHERS = "OTHERS"

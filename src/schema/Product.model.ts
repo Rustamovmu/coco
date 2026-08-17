@@ -1,7 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import { ProductCollection, ProductSize, ProductStatus, ProductShoeSize } from "../libs/enums/product.enum";
+import { Product } from "../libs/types/product";
 
-const productShema = new Schema(
+const productShema = new Schema<Product>(
     {
         productStatus: {
             type: String,
@@ -37,9 +38,8 @@ const productShema = new Schema(
         },
 
         productShoeSize: {
-            type: Number,
+            type: String,
             enum: ProductShoeSize,
-            default: ProductShoeSize.EU_40,
         },
 
         productDesc: {
@@ -60,8 +60,8 @@ const productShema = new Schema(
 );
 
 productShema.index(
-    { productName: 1, productSize: 1, ProductShoeSize: 1 },
+    { productName: 1, productSize: 1, productShoeSize: 1 },
     { unique: true }
 );
 
-export default mongoose.model("Product", productShema)
+export default mongoose.model<Product>("Product", productShema)
