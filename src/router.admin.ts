@@ -29,7 +29,7 @@ routerAdmin.get(
 
 routerAdmin.post(
     "/product/create", 
-    adminController.verifyAdmin,
+    adminController.verifyAdmin,      
     makeUploader("products").array("productImages", 5),
     productController.createNewProduct);
 
