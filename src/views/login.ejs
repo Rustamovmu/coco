@@ -1,10 +1,42 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/login.css" />
+
 <body>
-    <div style="text-align: center; margin-top: 50px;">
-        <h1>Welcome to the Products Page</h1>
-        <p>This is a simple test page.</p>
+  <form class="login-container" action="/admin/login" method="POST">
+    <div class="login-frame">
+      <div class="login-top">
+        <span>Admin login</span>
+        <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
+        <p>
+          Need an admin account?
+          <a href="/admin/signup" style="color: #6440fb">Signup</a>
+        </p>
+      </div>
+      <div class="login-input-frame">
+        <div class="login-input-container">
+          <label>Username *</label>
+          <input
+            type="text"
+            name="memberNick"
+            class="member-nick"
+            placeholder="Username"
+            required
+          />
+        </div>
+        <div class="login-input-container">
+          <label>Password *</label>
+          <input
+            type="password"
+            name="memberPassword"
+            class="member-password"
+            placeholder="Password"
+            required
+          />
+        </div>
+      </div>
+      <button class="login-btn btn" type="submit">Login</button>
     </div>
-    <link rel="stylesheet" href="css/main.css">
-    <script src="js/main.js"></script>
+  </form>
 </body>
 </html>

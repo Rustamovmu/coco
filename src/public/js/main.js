@@ -1,1 +1,1 @@
-console.log("this is main.js");
+console.log("Basic frontend javascript file");

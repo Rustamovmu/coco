@@ -1,10 +1,60 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/signup.css" />
+
 <body>
-    <div style="text-align: center; margin-top: 50px;">
-        <h1>Welcome to the Products Page</h1>
-        <p>This is a simple test page.</p>
-    </div>
-    <link rel="stylesheet" href="css/main.css">
-    <script src="js/main.js"></script>
+  <div class="signup-container">
+    <form onsubmit="return validateSignupForm()" action="/admin/signup" method="POST" enctype="multipart/form-data">
+      <div class="signup-frame" style="width: 650px">
+        <div class="signup-top">
+          <span>Create admin account</span>
+          <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
+          <p>
+            Already have an account?
+            <a href="/admin/login" style="color: #6440fb">Login</a>
+          </p>
+        </div>
+
+        <div class="sign-input-frame" style="justify-content: space-between">
+          <div class="sign-up-frame">
+            <label>Username *</label>
+            <input type="text" name="memberNick" class="member-nick" placeholder="Username" required />
+          </div>
+          <div class="sign-up-frame">
+            <label>Phone *</label>
+            <input type="tel" name="memberPhone" class="member-phone" placeholder="Phone" required />
+          </div>
+        </div>
+        <div class="sign-input-frame" style="justify-content: space-between">
+          <div class="sign-up-frame">
+            <label>Password *</label>
+            <input type="password" name="memberPassword" class="member-password" placeholder="Password" required />
+          </div>
+          <div class="sign-up-frame">
+            <label>Repeat password *</label>
+            <input type="password" name="confirmPassword" class="confirm-password" placeholder="Repeat password" required />
+          </div>
+        </div>
+
+        <div class="signup-input-frame">
+          <div class="media-frame">
+            <img class="upload-img-frame" alt="Selected profile image preview" />
+            <div class="upload-container">
+              <span class="media-text">Profile image *</span>
+              <div class="file-box bs3-primary preview-image" style="margin-top: 25px; display: flex">
+                <input class="upload-name" value="Choose image" disabled />
+                <label for="input-file" class="file-input-label">Upload image</label>
+                <input type="file" id="input-file" class="upload-hidden form-control-file member-image" name="memberImage" accept="image/jpeg,image/png" required />
+              </div>
+              <p class="thumbnail-desc">Upload a JPG, JPEG, or PNG image.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="signup-btn btn" type="submit">Signup</button>
+      </div>
+    </form>
+  </div>
+  <script type="text/javascript" src="/js/signup.js"></script>
 </body>
 </html>

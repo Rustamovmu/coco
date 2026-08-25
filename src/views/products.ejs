@@ -1,13 +1,167 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/products.css" />
+
 <body>
-    <div>
-        <div>Products page</div>
+  <main class="products-container">
+    <nav class="navigation-menu" aria-label="Admin navigation">
+      <ul class="nav justify-content-center">
+        <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/admin/product/all">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/user/all">Users</a></li>
+        <li class="nav-item" onclick="return confirm('Do you want to logout?')">
+          <a class="nav-link" href="/admin/logout">Logout</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="products-dashboard" aria-labelledby="products-title">
+      <header class="catalog-header">
         <div>
-            <%=member.memberNick%>
-            <% products.map(function(value, key) { %>
-                <p><%= value.productName %> - <%= value.productSize %></p>
-            <% }) %>
+          <p class="eyebrow">COCO INVENTORY</p>
+          <h1 id="products-title">Curate your collection.</h1>
+          <p class="catalog-subtitle">Keep every style, size, and stock level in one polished view.</p>
         </div>
-    </div>
+        <div class="catalog-actions">
+          <span class="product-count"><%= products.length %> <%= products.length === 1 ? 'item' : 'items' %></span>
+          <button class="primary-action" id="process-btn" type="button" aria-expanded="false" aria-controls="product-form-panel">
+            <span aria-hidden="true">+</span> Add product
+          </button>
+        </div>
+      </header>
+
+      <% if (products.length === 0) { %>
+        <section class="empty-catalog" aria-label="Empty product catalog">
+          <p class="eyebrow">YOUR CATALOG IS EMPTY</p>
+          <h2>Add the first piece to your collection.</h2>
+          <p>Create a product to start tracking styles, sizes, and availability.</p>
+          <button class="secondary-action empty-add-product" type="button">Add your first product</button>
+        </section>
+      <% } else { %>
+        <section class="product-grid" aria-label="Product catalog">
+          <% products.forEach(function(product) { %>
+            <% const coverImage = product.productImages && product.productImages[0]; %>
+            <article class="product-card">
+              <div class="product-visual product-visual--<%= product.productCollection.toLowerCase() %> <%= coverImage ? 'product-visual--with-image' : '' %>">
+                <% if (coverImage) { %>
+                  <img class="product-cover-image" src="/<%= coverImage %>" alt="<%= product.productName %>" loading="lazy" />
+                <% } %>
+                <span><%= product.productCollection === 'CLOTHE' ? 'CLOTHING' : product.productCollection %></span>
+                <% if (!coverImage) { %>
+                  <div class="product-monogram"><%= product.productName.charAt(0).toUpperCase() %></div>
+                <% } %>
+              </div>
+              <div class="product-card-body">
+                <div class="product-card-heading">
+                  <div>
+                    <p class="product-collection"><%= product.productCollection === 'CLOTHE' ? 'Clothing' : product.productCollection.charAt(0) + product.productCollection.slice(1).toLowerCase() %></p>
+                    <h2><%= product.productName %></h2>
+                  </div>
+                  <span class="product-price"><%= product.productPrice %>$</span>
+                </div>
+                <div class="product-meta">
+                  <span>Size <strong><%= product.productCollection === 'SHOES' ? product.productShoeSize : product.productSize %></strong></span>
+                  <span>In stock <strong><%= product.productLeftCount %></strong></span>
+                </div>
+                <% if (product.productDesc) { %>
+                  <p class="product-description"><%= product.productDesc %></p>
+                <% } %>
+                <div class="product-card-footer">
+                  <label class="status-control" for="status-<%= product._id %>">Status</label>
+                  <select class="new-product-status" id="status-<%= product._id %>" data-product-id="<%= product._id %>" aria-label="Status for <%= product.productName %>">
+                    <option value="PAUSE" <%= product.productStatus === 'PAUSE' ? 'selected' : '' %>>Paused</option>
+                    <option value="PROCESS" <%= product.productStatus === 'PROCESS' ? 'selected' : '' %>>Live</option>
+                    <option value="DELETE" <%= product.productStatus === 'DELETE' ? 'selected' : '' %>>Deleted</option>
+                  </select>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </section>
+      <% } %>
+
+      <section class="product-form-panel" id="product-form-panel" aria-labelledby="product-form-title" hidden>
+        <div class="form-panel-heading">
+          <div>
+            <p class="eyebrow">NEW ARRIVAL</p>
+            <h2 id="product-form-title">Add a product</h2>
+          </div>
+          <button class="close-form" id="cancel-btn" type="button" aria-label="Close product form">×</button>
+        </div>
+
+        <form onsubmit="return validateForm()" action="/admin/product/create" method="POST" enctype="multipart/form-data">
+          <input name="productStatus" value="PAUSE" class="product-status" type="hidden" />
+          <div class="form-grid form-grid--name">
+            <label class="form-field" for="product-name">
+              <span>Product name *</span>
+              <input id="product-name" type="text" placeholder="e.g. Essential bomber jacket" name="productName" class="product-name" required />
+            </label>
+          </div>
+          <div class="form-grid">
+            <label class="form-field" for="product-price">
+              <span>Price *</span>
+              <input id="product-price" type="number" min="0" placeholder="0" name="productPrice" class="product-price" required />
+            </label>
+            <label class="form-field" for="product-left-count">
+              <span>Available quantity *</span>
+              <input id="product-left-count" type="number" min="0" placeholder="0" name="productLeftCount" class="product-left-count" required />
+            </label>
+          </div>
+          <div class="form-grid">
+            <label class="form-field" for="product-collection">
+              <span>Collection *</span>
+              <select id="product-collection" class="product-collection" name="productCollection">
+                <option value="CLOTHE" selected>Clothing</option>
+                <option value="PANTS">Pants</option>
+                <option value="HAT">Hat</option>
+                <option value="SHOES">Shoes</option>
+                <option value="OTHERS">Other</option>
+              </select>
+            </label>
+            <label class="form-field" id="product-size-field" for="product-size">
+              <span>Clothing size</span>
+              <select id="product-size" class="product-size" name="productSize">
+                <option value="S">S</option>
+                <option value="M" selected>M</option>
+                <option value="L">L</option>
+                <option value="XXL">XXL</option>
+                <option value="ONESIZE">One size</option>
+              </select>
+            </label>
+            <label class="form-field" id="product-shoe-size-field" for="product-shoe-size" hidden>
+              <span>Shoe size</span>
+              <select id="product-shoe-size" class="product-shoe-size" name="productShoeSize" disabled>
+                <% for (let size = 36; size <= 47; size++) { %>
+                  <option value="<%= size %>"><%= size %></option>
+                <% } %>
+              </select>
+            </label>
+          </div>
+          <label class="form-field" for="product-desc">
+            <span>Description</span>
+            <textarea id="product-desc" name="productDesc" class="product-desc" placeholder="A concise description of the piece."></textarea>
+          </label>
+          <fieldset class="product-images-fieldset">
+            <legend>Product images *</legend>
+            <div class="upload-grid">
+              <% for (let imageNumber = 1; imageNumber <= 5; imageNumber++) { %>
+                <label class="upload-slot" for="product-image-<%= imageNumber %>">
+                  <input id="product-image-<%= imageNumber %>" type="file" name="productImages" class="product-image" accept="image/jpeg,image/png" <%= imageNumber === 1 ? 'required' : '' %> />
+                  <img class="upload-preview" alt="Selected product image preview" hidden />
+                  <span class="upload-slot-icon" aria-hidden="true">+</span>
+                  <span class="upload-slot-name"><%= imageNumber === 1 ? 'Cover image' : 'Add image' %></span>
+                </label>
+              <% } %>
+            </div>
+          </fieldset>
+          <div class="form-actions">
+            <button class="secondary-action" id="form-cancel-btn" type="button">Cancel</button>
+            <button type="submit" class="primary-action">Create product</button>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+  <script type="text/javascript" src="/js/products.js"></script>
 </body>
 </html>

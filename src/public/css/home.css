@@ -1,0 +1,114 @@
+.home-container {
+  min-height: 100vh;
+  padding: 28px 5vw 64px;
+  color: #f8f3ea;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(218, 112, 20, 0.36), transparent 32%),
+    linear-gradient(135deg, #120d0b 0%, #20140f 48%, #121716 100%);
+}
+
+.home-container .navigation-menu {
+  position: relative;
+  z-index: 1;
+  font-family: monospace;
+}
+
+.home-container .nav-link {
+  color: #ecd6ae;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-container .nav-link:hover,
+.home-container .nav-link.active {
+  color: #fff7e8;
+}
+
+.home-content {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1.15fr);
+  gap: clamp(36px, 7vw, 100px);
+  align-items: center;
+  width: min(1160px, 100%);
+  margin: clamp(40px, 9vh, 100px) auto 0;
+}
+
+.home-intro {
+  max-width: 470px;
+}
+
+.home-kicker {
+  margin: 0 0 16px;
+  color: #dd9d5c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.home-intro h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(2.6rem, 5vw, 5rem);
+  font-weight: 600;
+  line-height: 0.98;
+}
+
+.home-description {
+  max-width: 390px;
+  margin: 24px 0 32px;
+  color: #d6c8b8;
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.home-cta {
+  display: inline-block;
+  padding: 13px 22px;
+  border: 1px solid #e4aa68;
+  border-radius: 2px;
+  color: #fff7e8;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.home-cta:hover {
+  color: #20140f;
+  background: #e4aa68;
+  text-decoration: none;
+}
+
+.fashion-hero-frame {
+  overflow: hidden;
+  border: 1px solid rgba(236, 214, 174, 0.26);
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+.fashion-hero {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+@media (max-width: 760px) {
+  .home-container {
+    padding: 20px 20px 48px;
+  }
+
+  .home-content {
+    grid-template-columns: 1fr;
+    margin-top: 48px;
+  }
+
+  .home-intro {
+    max-width: none;
+  }
+
+  .fashion-hero-frame {
+    max-width: 560px;
+  }
+}
