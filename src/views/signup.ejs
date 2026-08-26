@@ -3,58 +3,61 @@
 <link rel="stylesheet" type="text/css" href="/css/signup.css" />
 
 <body>
-  <div class="signup-container">
-    <form onsubmit="return validateSignupForm()" action="/admin/signup" method="POST" enctype="multipart/form-data">
-      <div class="signup-frame" style="width: 650px">
-        <div class="signup-top">
-          <span>Create admin account</span>
-          <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
-          <p>
-            Already have an account?
-            <a href="/admin/login" style="color: #6440fb">Login</a>
-          </p>
-        </div>
+  <main class="signup-container">
+    <div class="auth-nova" data-auth-nova aria-hidden="true">
+      <span class="auth-nova__word">Coco</span>
+    </div>
+    <form class="signup-frame" onsubmit="return validateSignupForm()" action="/admin/signup" method="POST" enctype="multipart/form-data">
+      <header class="signup-top">
+        <a class="brand" href="/admin/" aria-label="Coco admin home">
+          <span class="brand-mark" aria-hidden="true">C</span>
+          <span>Coco</span>
+        </a>
+        <p class="eyebrow">Store administration</p>
+        <h1>Create your account</h1>
+        <p class="intro">Set up your admin access to start managing the Coco store.</p>
+      </header>
 
-        <div class="sign-input-frame" style="justify-content: space-between">
+      <div class="sign-input-frame">
           <div class="sign-up-frame">
-            <label>Username *</label>
-            <input type="text" name="memberNick" class="member-nick" placeholder="Username" required />
-          </div>
-          <div class="sign-up-frame">
-            <label>Phone *</label>
-            <input type="tel" name="memberPhone" class="member-phone" placeholder="Phone" required />
-          </div>
-        </div>
-        <div class="sign-input-frame" style="justify-content: space-between">
-          <div class="sign-up-frame">
-            <label>Password *</label>
-            <input type="password" name="memberPassword" class="member-password" placeholder="Password" required />
+            <label for="memberNick">Username</label>
+            <input type="text" id="memberNick" name="memberNick" class="member-nick" placeholder="Choose a username" autocomplete="username" required />
           </div>
           <div class="sign-up-frame">
-            <label>Repeat password *</label>
-            <input type="password" name="confirmPassword" class="confirm-password" placeholder="Repeat password" required />
+            <label for="memberPhone">Phone</label>
+            <input type="tel" id="memberPhone" name="memberPhone" class="member-phone" placeholder="Enter your phone number" autocomplete="tel" required />
           </div>
-        </div>
-
-        <div class="signup-input-frame">
-          <div class="media-frame">
-            <img class="upload-img-frame" alt="Selected profile image preview" />
-            <div class="upload-container">
-              <span class="media-text">Profile image *</span>
-              <div class="file-box bs3-primary preview-image" style="margin-top: 25px; display: flex">
-                <input class="upload-name" value="Choose image" disabled />
-                <label for="input-file" class="file-input-label">Upload image</label>
-                <input type="file" id="input-file" class="upload-hidden form-control-file member-image" name="memberImage" accept="image/jpeg,image/png" required />
-              </div>
-              <p class="thumbnail-desc">Upload a JPG, JPEG, or PNG image.</p>
-            </div>
-          </div>
-        </div>
-
-        <button class="signup-btn btn" type="submit">Signup</button>
       </div>
+      <div class="sign-input-frame">
+          <div class="sign-up-frame">
+            <label for="memberPassword">Password</label>
+            <input type="password" id="memberPassword" name="memberPassword" class="member-password" placeholder="Create a password" autocomplete="new-password" required />
+          </div>
+          <div class="sign-up-frame">
+            <label for="confirmPassword">Confirm password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="confirm-password" placeholder="Repeat your password" autocomplete="new-password" required />
+          </div>
+      </div>
+
+      <div class="signup-input-frame">
+        <div class="media-frame">
+          <img class="upload-img-frame" alt="Selected profile image preview" />
+          <div class="upload-container">
+            <span class="media-text">Profile image</span>
+            <div class="file-box preview-image">
+              <input class="upload-name" value="Choose an image" disabled />
+              <label for="input-file" class="file-input-label">Browse</label>
+              <input type="file" id="input-file" class="upload-hidden form-control-file member-image" name="memberImage" accept="image/jpeg,image/png" required />
+            </div>
+            <p class="thumbnail-desc">JPG, JPEG, or PNG. This image appears on your admin profile.</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="signup-btn" type="submit">Create account</button>
+      <footer class="signup-footer">Already have access? <a href="/admin/login">Sign in</a><span aria-hidden="true">•</span><a href="/admin/">Back to home</a></footer>
     </form>
-  </div>
+  </main>
+  <script type="module" src="/js/auth-nova.js"></script>
   <script type="text/javascript" src="/js/signup.js"></script>
 </body>
-</html>

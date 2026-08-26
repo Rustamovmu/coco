@@ -3,40 +3,56 @@
 <link rel="stylesheet" type="text/css" href="/css/login.css" />
 
 <body>
-  <form class="login-container" action="/admin/login" method="POST">
-    <div class="login-frame">
-      <div class="login-top">
-        <span>Admin login</span>
-        <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
-        <p>
-          Need an admin account?
-          <a href="/admin/signup" style="color: #6440fb">Signup</a>
-        </p>
-      </div>
+  <main class="login-container">
+    <div class="auth-nova" data-auth-nova aria-hidden="true">
+      <span class="auth-nova__word">Coco</span>
+    </div>
+    <form class="login-frame" action="/admin/login" method="POST">
+      <header class="login-top">
+        <a class="brand" href="/admin/" aria-label="Coco admin home">
+          <span class="brand-mark" aria-hidden="true">C</span>
+          <span>Coco</span>
+        </a>
+        <p class="eyebrow">Store administration</p>
+        <h1>Welcome back</h1>
+        <p class="intro">Sign in to manage your store, products, and customers.</p>
+      </header>
+
       <div class="login-input-frame">
         <div class="login-input-container">
-          <label>Username *</label>
+          <label for="memberNick">Username</label>
           <input
             type="text"
+            id="memberNick"
             name="memberNick"
             class="member-nick"
-            placeholder="Username"
+            placeholder="Enter your username"
+            autocomplete="username"
             required
           />
         </div>
         <div class="login-input-container">
-          <label>Password *</label>
+          <label for="memberPassword">Password</label>
           <input
             type="password"
+            id="memberPassword"
             name="memberPassword"
             class="member-password"
-            placeholder="Password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
             required
           />
         </div>
       </div>
-      <button class="login-btn btn" type="submit">Login</button>
-    </div>
-  </form>
+
+      <button class="login-btn" type="submit">Sign in</button>
+
+      <footer class="login-footer">
+        <a href="/admin/">Back to home</a>
+        <span aria-hidden="true">•</span>
+        <span>Need access? <a href="/admin/signup">Create an account</a></span>
+      </footer>
+    </form>
+  </main>
+  <script type="module" src="/js/auth-nova.js"></script>
 </body>
-</html>
