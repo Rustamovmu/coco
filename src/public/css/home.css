@@ -1,10 +1,24 @@
 .home-container {
   min-height: 100vh;
+  overflow: hidden;
   padding: 28px 5vw 64px;
+  position: relative;
   color: #f8f3ea;
   background:
     radial-gradient(circle at 10% 12%, rgba(218, 112, 20, 0.36), transparent 32%),
     linear-gradient(135deg, #120d0b 0%, #20140f 48%, #121716 100%);
+}
+
+.home-particles {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.home-particles canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
 }
 
 .home-container .navigation-menu {
@@ -32,6 +46,8 @@
   align-items: center;
   width: min(1160px, 100%);
   margin: clamp(40px, 9vh, 100px) auto 0;
+  position: relative;
+  z-index: 1;
 }
 
 .home-intro {

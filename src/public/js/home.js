@@ -1,98 +1,100 @@
-console.log("Home frontend javascript file");
+const particleContainer = document.querySelector("[data-home-particles]");
 
-function fitElementToParent(el, padding) {
-  let timeout = null;
+if (particleContainer) {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const particles = [];
+  const connectionDistance = 120;
+  let animationFrame = 0;
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
 
-  function resize() {
-    if (timeout) clearTimeout(timeout);
-    anime.set(el, { scale: 1 });
-    let pad = padding || 0,
-      parentEl = el.parentNode,
-      elOffsetWidth = el.offsetWidth - pad,
-      parentOffsetWidth = parentEl.offsetWidth,
-      ratio = parentOffsetWidth / elOffsetWidth;
-    timeout = setTimeout(anime.set(el, { scale: ratio }), 10);
-  }
+  particleContainer.append(canvas);
 
-  resize();
-  window.addEventListener("resize", resize);
-}
-
-(function () {
-  const sphereEl = document.querySelector(".sphere-animation"),
-    spherePathEls = sphereEl.querySelectorAll(".sphere path"),
-    pathLength = spherePathEls.length,
-    animations = [];
-
-  fitElementToParent(sphereEl);
-
-  const breathAnimation = anime({
-    begin: function () {
-      for (let i = 0; i < pathLength; i++) {
-        animations.push(
-          anime({
-            targets: spherePathEls[i],
-            stroke: {
-              value: ["rgba(255,75,75,1)", "rgba(80,80,80,.35)"],
-              duration: 500,
-            },
-            translateX: [2, -4],
-            translateY: [2, -4],
-            easing: "easeOutQuad",
-            autoplay: false,
-          })
-        );
-      }
-    },
-    update: function (ins) {
-      animations.forEach(function (animation, i) {
-        let percent = (1 - Math.sin(i * 0.35 + 0.0022 * ins.currentTime)) / 2;
-        animation.seek(animation.duration * percent);
-      });
-    },
-    duration: Infinity,
-    autoplay: false,
+  const createParticle = () => ({
+    opacity: Math.random() * 0.45 + 0.2,
+    radius: Math.random() * 1.8 + 0.5,
+    speedX: (Math.random() - 0.5) * 0.35,
+    speedY: (Math.random() - 0.5) * 0.35,
+    x: Math.random() * width,
+    y: Math.random() * height,
   });
 
-  const introAnimation = anime
-    .timeline({
-      autoplay: false,
-    })
-    .add(
-      {
-        targets: spherePathEls,
-        strokeDashoffset: {
-          value: [anime.setDashoffset, 0],
-          duration: 3900,
-          easing: "easeInOutCirc",
-          delay: anime.stagger(190, { direction: "reverse" }),
-        },
-        duration: 2000,
-        delay: anime.stagger(60, { direction: "reverse" }),
-        easing: "linear",
-      },
-      0
-    );
+  const populateParticles = () => {
+    const amount = Math.max(45, Math.min(120, Math.floor((width * height) / 18000)));
+    particles.length = 0;
+    for (let index = 0; index < amount; index += 1) particles.push(createParticle());
+  };
 
-  const shadowAnimation = anime(
-    {
-      targets: "#sphereGradient",
-      x1: "25%",
-      x2: "25%",
-      y1: "0%",
-      y2: "75%",
-      duration: 30000,
-      easing: "easeOutQuint",
-      autoplay: false,
-    },
-    0
-  );
+  const draw = () => {
+    context.clearRect(0, 0, width, height);
 
-  function init() {
-    introAnimation.play();
-    breathAnimation.play();
-    shadowAnimation.play();
-  }
+    particles.forEach((particle, index) => {
+      context.beginPath();
+      context.fillStyle = `rgba(9, 232, 40, ${particle.opacity})`;
+      context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      context.fill();
 
-  init();
-})();
+      for (let otherIndex = index + 1; otherIndex < particles.length; otherIndex += 1) {
+        const other = particles[otherIndex];
+        const horizontalDistance = particle.x - other.x;
+        const verticalDistance = particle.y - other.y;
+        const distance = Math.hypot(horizontalDistance, verticalDistance);
+
+        if (distance < connectionDistance) {
+          context.beginPath();
+          context.strokeStyle = `rgba(9, 232, 40, ${(1 - distance / connectionDistance) * 0.16})`;
+          context.lineWidth = 0.6;
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(other.x, other.y);
+          context.stroke();
+        }
+      }
+    });
+  };
+
+  const move = () => {
+    particles.forEach((particle) => {
+      particle.x += particle.speedX;
+      particle.y += particle.speedY;
+
+      if (particle.x < 0 || particle.x > width) particle.speedX *= -1;
+      if (particle.y < 0 || particle.y > height) particle.speedY *= -1;
+    });
+  };
+
+  const animate = () => {
+    move();
+    draw();
+    animationFrame = window.requestAnimationFrame(animate);
+  };
+
+  const updateMotion = () => {
+    window.cancelAnimationFrame(animationFrame);
+    draw();
+    if (!reducedMotion.matches) animationFrame = window.requestAnimationFrame(animate);
+  };
+
+  const resize = () => {
+    const bounds = particleContainer.getBoundingClientRect();
+    pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+    width = bounds.width;
+    height = bounds.height;
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    populateParticles();
+    updateMotion();
+  };
+
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(particleContainer);
+  reducedMotion.addEventListener("change", updateMotion);
+  window.addEventListener("pagehide", () => {
+    window.cancelAnimationFrame(animationFrame);
+    resizeObserver.disconnect();
+    reducedMotion.removeEventListener("change", updateMotion);
+  }, { once: true });
+}
