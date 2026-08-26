@@ -1,11 +1,11 @@
 $(function () {
-    const collection = $("#product-collection");
-    const clothingSizeField = $("#product-size-field");
-    const shoeSizeField = $("#product-shoe-size-field");
-    const clothingSize = $("#product-size");
-    const shoeSize = $("#product-shoe-size");
-    const formPanel = $("#product-form-panel");
-    const openFormButton = $("#process-btn");
+    const collection = $("#product-collection"),
+        clothingSizeField = $("#product-size-field"),
+        shoeSizeField = $("#product-shoe-size-field"),
+        clothingSize = $("#product-size"),
+        shoeSize = $("#product-shoe-size"),
+        formPanel = $("#product-form-panel"),
+        openFormButton = $("#process-btn")
 
     function updateSizeField() {
         const isShoe = collection.val() === "SHOES";
@@ -49,11 +49,11 @@ $(function () {
     $("#cancel-btn, #form-cancel-btn").on("click", () => setProductFormOpen(false));
 
     $(".product-image").on("change", function () {
-        const file = this.files?.[0];
-        const slot = $(this).closest(".upload-slot");
-        const label = slot.find(".upload-slot-name");
-        const preview = slot.find(".upload-preview");
-        const previousPreviewUrl = slot.data("previewUrl");
+        const file = this.files?.[0],
+            slot = $(this).closest(".upload-slot"),
+            label = slot.find(".upload-slot-name"),
+            preview = slot.find(".upload-preview"),
+            previousPreviewUrl = slot.data("previewUrl");
 
         if (previousPreviewUrl) URL.revokeObjectURL(previousPreviewUrl);
 
@@ -72,9 +72,9 @@ $(function () {
 
 
     $("[data-product-gallery]").each(function () {
-        const gallery = $(this);
-        const images = gallery.find("[data-product-gallery-image]");
-        const counter = gallery.find(".product-gallery-index");
+        const gallery = $(this),
+            images = gallery.find("[data-product-gallery-image]"),
+            counter = gallery.find(".product-gallery-index");
         let currentIndex = 0;
 
         function showImage(index) {
@@ -91,9 +91,9 @@ $(function () {
     });
 
     $(".new-product-status").on("change", async function (event) {
-        const select = event.currentTarget;
-        const id = select.dataset.productId;
-        const productStatus = select.value;
+        const select = event.currentTarget,
+            id = select.dataset.productId,
+            productStatus = select.value;
 
         if (!id) return;
 

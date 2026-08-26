@@ -3,14 +3,14 @@ import * as THREE from "https://esm.sh/three@0.136.0";
 const container = document.querySelector("[data-auth-nova]");
 
 if (container) {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
-  const clock = new THREE.Clock();
-  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const particles = [];
-  const sizes = [];
-  const shifts = [];
+  const scene = new THREE.Scene(),
+    camera = new THREE.PerspectiveCamera(60, 1, 1, 1000),
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false }),
+    clock = new THREE.Clock(),
+    motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)"),
+    particles = [],
+    sizes = [],
+    shifts = [];
   let animationFrame = 0;
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -35,10 +35,10 @@ if (container) {
   }
 
   for (let index = 0; index < 15000; index += 1) {
-    const innerRadius = 10;
-    const outerRadius = 40;
-    const randomRadius = Math.pow(Math.random(), 1.5);
-    const radius = Math.sqrt(outerRadius ** 2 * randomRadius + (1 - randomRadius) * innerRadius ** 2);
+    const innerRadius = 10,
+      outerRadius = 40,
+      randomRadius = Math.pow(Math.random(), 1.5),
+      radius = Math.sqrt(outerRadius ** 2 * randomRadius + (1 - randomRadius) * innerRadius ** 2);
 
     particles.push(new THREE.Vector3().setFromCylindricalCoords(radius, Math.random() * Math.PI * 2, (Math.random() - 0.5) * 2));
     sizes.push(Math.random() * 1.5 + 0.5);

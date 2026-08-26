@@ -1,15 +1,15 @@
 const particleContainer = document.querySelector("[data-home-particles]");
 
 if (particleContainer) {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const particles = [];
-  const connectionDistance = 120;
-  let animationFrame = 0;
-  let width = 0;
-  let height = 0;
-  let pixelRatio = 1;
+  const canvas = document.createElement("canvas"),
+    context = canvas.getContext("2d"),
+    reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)"),
+    particles = [],
+    connectionDistance = 120;
+  let animationFrame = 0,
+    width = 0,
+    height = 0,
+    pixelRatio = 1;
 
   particleContainer.append(canvas);
 
