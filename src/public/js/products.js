@@ -16,19 +16,35 @@ $(function () {
     }
 
     function setProductFormOpen(isOpen) {
-        formPanel.prop("hidden", !isOpen);
         openFormButton.attr("aria-expanded", String(isOpen));
 
         if (isOpen) {
-            formPanel.get(0)?.scrollIntoView({ behavior: "smooth", block: "start" });
-            $("#product-name").trigger("focus");
+           const panelTop = formPanel
+                .prop("hidden", false)
+                .css("visibility", "hidden")
+                .show()
+                .offset().top;
+
+            formPanel
+                .hide()
+                .css("visibility", "")
+                .stop(true, true)
+                .slideDown(500);
+
+            $("html, body")
+                .stop(true)
+                .animate({ scrollTop: panelTop - 24 }, 500);
+
+                $("#product-name").trigger("focus");
+        } else {
+            formPanel.stop(true, true).slideUp(500, () => formPanel.prop("hidden", true));
         }
     }
 
     collection.on("change", updateSizeField);
     updateSizeField();
 
-    openFormButton.on("click", () => setProductFormOpen(true));
+    openFormButton.on("click", () => setProductFormOpen(formPanel.prop("hidden")));
     $(".empty-add-product").on("click", () => setProductFormOpen(true));
     $("#cancel-btn, #form-cancel-btn").on("click", () => setProductFormOpen(false));
 
@@ -54,6 +70,26 @@ $(function () {
         }
     });
 
+
+    $("[data-product-gallery]").each(function () {
+        const gallery = $(this);
+        const images = gallery.find("[data-product-gallery-image]");
+        const counter = gallery.find(".product-gallery-index");
+        let currentIndex = 0;
+
+        function showImage(index) {
+            currentIndex = (index + images.length) % images.length;
+            images.prop("hidden", true).removeClass("is-active");
+            images.eq(currentIndex).prop("hidden", false).addClass("is-active");
+            counter.text(`${currentIndex + 1} / ${images.length}`);
+        }
+
+        gallery.on("click", ".product-gallery-control", function () {
+            const direction = this.dataset.galleryAction === "next" ? 1 : -1;
+            showImage(currentIndex + direction);
+        });
+    });
+
     $(".new-product-status").on("change", async function (event) {
         const select = event.currentTarget;
         const id = select.dataset.productId;
@@ -61,6 +97,8 @@ $(function () {
 
         if (!id) return;
 
+        select.classList.toggle("status--deleted", productStatus === "DELETE");
+        select.classList.toggle("status--processing", productStatus === "PROCESS");
         select.disabled = true;
         try {
             const response = await axios.post(`/admin/product/${id}`, { productStatus });

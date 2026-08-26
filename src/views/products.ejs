@@ -40,15 +40,25 @@
       <% } else { %>
         <section class="product-grid" aria-label="Product catalog">
           <% products.forEach(function(product) { %>
-            <% const coverImage = product.productImages && product.productImages[0]; %>
+            <% const productImages = product.productImages || []; %>
+            <% const coverImage = productImages[0]; %>
             <article class="product-card">
-              <div class="product-visual product-visual--<%= product.productCollection.toLowerCase() %> <%= coverImage ? 'product-visual--with-image' : '' %>">
+              <div class="product-visual product-visual--<%= product.productCollection.toLowerCase() %> <%= coverImage ? 'product-visual--with-image' : '' %>" data-product-gallery>
                 <% if (coverImage) { %>
-                  <img class="product-cover-image" src="/<%= coverImage %>" alt="<%= product.productName %>" loading="lazy" />
+                  <% productImages.forEach(function(image, imageIndex) { %>
+                    <img class="product-cover-image <%= imageIndex === 0 ? 'is-active' : '' %>" data-product-gallery-image src="/<%= image %>" alt="<%= product.productName %> — image <%= imageIndex + 1 %> of <%= productImages.length %>" loading="lazy" <%= imageIndex === 0 ? '' : 'hidden' %> />
+                  <% }); %>
                 <% } %>
                 <span><%= product.productCollection === 'CLOTHE' ? 'CLOTHING' : product.productCollection %></span>
                 <% if (!coverImage) { %>
                   <div class="product-monogram"><%= product.productName.charAt(0).toUpperCase() %></div>
+                <% } %>
+                <% if (productImages.length > 1) { %>
+                  <div class="product-gallery-controls" aria-label="Image gallery for <%= product.productName %>">
+                    <button class="product-gallery-control" type="button" data-gallery-action="previous" aria-label="Previous product image">‹</button>
+                    <span class="product-gallery-index" aria-live="polite">1 / <%= productImages.length %></span>
+                    <button class="product-gallery-control" type="button" data-gallery-action="next" aria-label="Next product image">›</button>
+                  </div>
                 <% } %>
               </div>
               <div class="product-card-body">
@@ -57,7 +67,7 @@
                     <p class="product-collection"><%= product.productCollection === 'CLOTHE' ? 'Clothing' : product.productCollection.charAt(0) + product.productCollection.slice(1).toLowerCase() %></p>
                     <h2><%= product.productName %></h2>
                   </div>
-                  <span class="product-price"><%= product.productPrice %>$</span>
+                  <span class="product-price">$<%= product.productPrice %></span>
                 </div>
                 <div class="product-meta">
                   <span>Size <strong><%= product.productCollection === 'SHOES' ? product.productShoeSize : product.productSize %></strong></span>
@@ -68,9 +78,9 @@
                 <% } %>
                 <div class="product-card-footer">
                   <label class="status-control" for="status-<%= product._id %>">Status</label>
-                  <select class="new-product-status" id="status-<%= product._id %>" data-product-id="<%= product._id %>" aria-label="Status for <%= product.productName %>">
+                  <select class="new-product-status <%= product.productStatus === 'DELETE' ? 'status--deleted' : product.productStatus === 'PROCESS' ? 'status--processing' : '' %>" id="status-<%= product._id %>" data-product-id="<%= product._id %>" aria-label="Status for <%= product.productName %>">
                     <option value="PAUSE" <%= product.productStatus === 'PAUSE' ? 'selected' : '' %>>Paused</option>
-                    <option value="PROCESS" <%= product.productStatus === 'PROCESS' ? 'selected' : '' %>>Live</option>
+                    <option value="PROCESS" <%= product.productStatus === 'PROCESS' ? 'selected' : '' %>>Process</option>
                     <option value="DELETE" <%= product.productStatus === 'DELETE' ? 'selected' : '' %>>Deleted</option>
                   </select>
                 </div>
