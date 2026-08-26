@@ -1,27 +1,25 @@
-
-console.log("Users frontend javascript file");
-
 $(function () {
-    $(".member-status").on("change", function (e) {
-        const id = e.target.id,
-            memberStatus = $(`#${id}.member-status`).val();
+    $(".member-status").on("change", async function () {
+        const select = this;
+        const id = select.id;
+        const memberStatus = select.value;
 
-        axios
-            .post("/admin/user/edit", {
+        select.classList.remove("status--active", "status--block", "status--delete");
+        select.classList.add(`status--${memberStatus.toLowerCase()}`);
+        select.disabled = true;
+        try {
+            const response = await axios.post("/admin/user/edit", {
                 _id: id,
-                memberStatus: memberStatus,
-            })
-            .then ((response) => {
-                console.log("response:", response);
-                const result = response.data;
-
-                if (result.data) {
-                    $(".member-status").blur();
-                } else alert("User update is failed!");
-            })
-            .catch((err) => {
-                console.log(err);
-                alert("User update is failed!");
+                memberStatus,
             });
+
+            if (!response.data.data) throw new Error("User update failed");
+            select.blur();
+        } catch (error) {
+            console.error(error);
+            alert("User update failed. Please try again.");
+        } finally {
+            select.disabled = false;
+        }
     });
-}); 
+});

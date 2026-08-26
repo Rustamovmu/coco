@@ -3,8 +3,8 @@
 <link rel="stylesheet" type="text/css" href="/css/users.css" />
 
 <body>
-  <div class="users-container">
-    <div class="navigation-menu">
+  <main class="users-container">
+    <nav class="navigation-menu" aria-label="Admin navigation">
       <ul class="nav justify-content-center">
         <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/admin/product/all">Products</a></li>
@@ -13,39 +13,56 @@
           <a class="nav-link" href="/admin/logout">Logout</a>
         </li>
       </ul>
-    </div>
+    </nav>
 
-    <div class="users-frame">
-      <div class="board">
-        <div class="user-table">
-          <span class="header-name" style="margin-bottom: 30px">All users</span>
-          <% if (users.length === 0) { %>
-            <p>No users found.</p>
-          <% } else { %>
-            <table class="table table-hover table-sm">
-              <thead class="thead-light">
-                <tr>
-                  <th scope="col">No.</th>
-                  <th scope="col">Username</th>
-                  <th scope="col">Phone</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% users.forEach(function(user, index) { %>
-                  <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= user.memberNick %></td>
-                    <td><%= user.memberPhone %></td>
-                    <td><%= user.memberStatus %></td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          <% } %>
+    <section class="users-dashboard" aria-labelledby="users-title">
+      <header class="users-header">
+        <div>
+          <p class="eyebrow">COCO COMMUNITY</p>
+          <h1 id="users-title">Manage your customers.</h1>
+          <p class="users-subtitle">Review customer details and update access status from one place.</p>
         </div>
-      </div>
-    </div>
-  </div>
+        <span class="user-count"><%= users.length %> <%= users.length === 1 ? 'user' : 'users' %></span>
+      </header>
+
+      <% if (users.length === 0) { %>
+        <section class="empty-users" aria-label="Empty user list">
+          <p class="eyebrow">NO CUSTOMERS YET</p>
+          <h2>Your customer list is empty.</h2>
+          <p>New customer accounts will appear here.</p>
+        </section>
+      <% } else { %>
+        <div class="users-table-frame">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Username</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(function(user, index) { %>
+                <tr>
+                  <td data-label="No."><%= index + 1 %></td>
+                  <td data-label="Username"><strong><%= user.memberNick %></strong></td>
+                  <td data-label="Phone">+<%= user.memberPhone %></td>
+                  <td data-label="Status">
+                    <select class="member-status status--<%= user.memberStatus.toLowerCase() %>" id="<%= user._id %>" aria-label="Status for <%= user.memberNick %>">
+                      <option value="ACTIVE" <%= user.memberStatus === 'ACTIVE' ? 'selected' : '' %>>Active</option>
+                      <option value="BLOCK" <%= user.memberStatus === 'BLOCK' ? 'selected' : '' %>>Blocked</option>
+                      <option value="DELETE" <%= user.memberStatus === 'DELETE' ? 'selected' : '' %>>Deleted</option>
+                    </select>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  </main>
+  <script type="text/javascript" src="/js/users.js"></script>
 </body>
 </html>
