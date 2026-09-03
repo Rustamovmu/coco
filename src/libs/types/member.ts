@@ -19,6 +19,13 @@ export interface Member {
     updatedAt: Date;
 }
 
+export interface AuthMember {
+    _id: Types.ObjectId;
+    memberType: MemberType;
+    memberStatus: MemberStatus;
+    memberNick: string;
+}
+
 export interface MemberInput {
     memberType?: MemberType;
     memberStatus?: MemberStatus;
@@ -52,4 +59,8 @@ export interface AdminRequest extends Request {
     session: Session & {member: Member};
     file: Express.Multer.File;
     files: Express.Multer.File[];
+}
+
+export interface ExtendedRequest extends Request {
+    member?: AuthMember;
 }

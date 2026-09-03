@@ -22,7 +22,7 @@ class MemberService {
 
         try {
             const result = await this.memberModel.create(input);
-            result.memberPassword = "";
+            result.memberPassword = undefined;
 
             return result.toJSON();
         } catch (err) {
@@ -62,6 +62,7 @@ class MemberService {
         if (!result) {
             throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
         }
+        result.memberPassword = undefined;
         return result;
     }
 
