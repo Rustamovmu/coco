@@ -9,8 +9,8 @@ import { AuthMember } from "../libs/types/member";
 const isObjectId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
 
 const shapeProductResponse = (product: Product, member?: AuthMember): ProductResponse => {
-    const raw = product as Product & { productLikedBy?: Types.ObjectId[] };
-    const { productLikedBy = [], ...publicProduct } = raw;
+    const raw = product as Product & { productLikedBy?: Types.ObjectId[]; productViewedBy?: Types.ObjectId[] };
+    const { productLikedBy = [], productViewedBy: _productViewedBy, ...publicProduct } = raw;
     const memberId = member ? String(member._id) : "";
     return {
         ...publicProduct,
@@ -85,15 +85,25 @@ class ProductService {
 
     public async getProduct(id: string, member?: AuthMember): Promise<ProductResponse> {
         if (!isObjectId(id)) throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
-        const result = await this.productModel
-            .findOneAndUpdate(
-                { _id: id, productStatus: ProductStatus.PROCESS },
-                { $inc: { productViews: 1 } },
-                { new: true }
-            )
-            .select("-__v")
-            .lean()
-            .exec();
+        let result;
+        if (member) {
+            result = await this.productModel
+                .findOneAndUpdate(
+                    { _id: id, productStatus: ProductStatus.PROCESS, productViewedBy: { $ne: member._id } },
+                    { $addToSet: { productViewedBy: member._id }, $inc: { productViews: 1 } },
+                    { new: true }
+                )
+                .select("+productLikedBy -__v")
+                .lean()
+                .exec();
+        }
+        if (!result) {
+            result = await this.productModel
+                .findOne({ _id: id, productStatus: ProductStatus.PROCESS })
+                .select("+productLikedBy -__v")
+                .lean()
+                .exec();
+        }
         if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
         return shapeProductResponse(result, member);
     }

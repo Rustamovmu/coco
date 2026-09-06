@@ -63,7 +63,7 @@ class OrderService {
             };
         });
         const orderSubtotal = orderItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
-        const orderShippingFee = orderSubtotal >= 150 ? 0 : 10;
+        const orderShippingFee = orderSubtotal >= 100 ? 0 : 5;
         const decremented: Array<{ productId: string; quantity: number }> = [];
 
         try {

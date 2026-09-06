@@ -13,12 +13,13 @@ export interface Product {
     productDesc?: string;
     productImages: string[];
     productViews: number;
+    productViewedBy: Types.ObjectId[];
     productLikedBy: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
 
-export type ProductResponse = Omit<Product, "productLikedBy"> & {
+export type ProductResponse = Omit<Product, "productLikedBy" | "productViewedBy"> & {
     productLikes: number;
     isLiked: boolean;
 };

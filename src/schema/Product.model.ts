@@ -56,6 +56,12 @@ const productShema = new Schema<Product>(
             default: 0,
         },
 
+        productViewedBy: {
+            type: [{ type: Schema.Types.ObjectId, ref: "Members" }],
+            default: [],
+            select: false,
+        },
+
         productLikedBy: {
             type: [{ type: Schema.Types.ObjectId, ref: "Members" }],
             default: [],
