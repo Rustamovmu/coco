@@ -452,6 +452,61 @@
   font-weight: 400;
 }
 
+.product-size-field {
+  border: 0;
+  margin: 0 0 16px;
+  min-width: 0;
+  padding: 0;
+}
+
+.product-size-field legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size-option {
+  cursor: pointer;
+  margin: 0;
+}
+
+.product-size-field .size-option input {
+  height: 1px;
+  opacity: 0;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.size-option span {
+  align-items: center;
+  background: #fffdf9;
+  border: 1px solid #dcd2c6;
+  border-radius: 6px;
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 600;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 48px;
+  padding: 0 12px;
+}
+
+.size-option input:checked + span {
+  background: var(--catalog-accent-dark);
+  border-color: var(--catalog-accent-dark);
+  color: #fff;
+}
+
+.size-option input:focus-visible + span {
+  box-shadow: 0 0 0 3px rgba(184, 108, 45, 0.2);
+}
+
 .form-field input,
 .form-field select {
   height: 48px;

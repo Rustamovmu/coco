@@ -34,12 +34,17 @@ const productShema = new Schema<Product>(
         productSize: {
             type: String,
             enum: ProductSize,
-            default: ProductSize.M,
         },
 
         productShoeSize: {
             type: String,
             enum: ProductShoeSize,
+        },
+
+        productSizes: {
+            type: [String],
+            enum: [...Object.values(ProductSize), ...Object.values(ProductShoeSize)],
+            default: [],
         },
 
         productDesc: {

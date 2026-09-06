@@ -8,8 +8,9 @@ export interface Product {
     productName: string;
     productPrice: number;
     productLeftCount: number;
-    productSize: ProductSize;
-    productShoeSize: ProductShoeSize;
+    productSizes: Array<ProductSize | ProductShoeSize>;
+    productSize?: ProductSize;
+    productShoeSize?: ProductShoeSize;
     productDesc?: string;
     productImages: string[];
     productViews: number;
@@ -38,6 +39,7 @@ export interface ProductInput {
     productName: string;
     productPrice: number;
     productLeftCount: number;
+    productSizes?: Array<ProductSize | ProductShoeSize>;
     productSize?: ProductSize;
     productShoeSize?: ProductShoeSize;
     productDesc?: string;
@@ -52,6 +54,7 @@ export interface ProductUpdateInput {
     productName?: string;
     productPrice?: number;
     productLeftCount?: number;
+    productSizes?: Array<ProductSize | ProductShoeSize>;
     productSize?: ProductSize;
     productShoeSize?: ProductShoeSize;
     productDesc?: string;

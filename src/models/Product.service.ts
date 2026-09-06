@@ -7,6 +7,16 @@ import { ProductCollection, ProductShoeSize, ProductSize, ProductStatus } from "
 import { AuthMember } from "../libs/types/member";
 
 const isObjectId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+const standardSizes = new Set<string>(Object.values(ProductSize));
+const shoeSizes = new Set<string>(Object.values(ProductShoeSize));
+
+const normalizeSizes = (value: unknown): string[] => {
+    const values = Array.isArray(value) ? value : value === undefined ? [] : [value];
+    if (values.some(size => typeof size !== "string")) {
+        throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    }
+    return [...new Set(values as string[])];
+};
 
 const shapeProductResponse = (product: Product, member?: AuthMember): ProductResponse => {
     const raw = product as Product & { productLikedBy?: Types.ObjectId[]; productViewedBy?: Types.ObjectId[] };
@@ -64,10 +74,10 @@ class ProductService {
         if (search) filter.productName = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
         if (size) {
             if (Object.values(ProductShoeSize).includes(size as ProductShoeSize)) {
-                filter.productShoeSize = size;
+                filter.$or = [{ productSizes: size }, { productShoeSize: size }];
                 filter.$and = [{ productCollection: ProductCollection.SHOES }];
             } else if (Object.values(ProductSize).includes(size as ProductSize)) {
-                filter.productSize = size;
+                filter.$or = [{ productSizes: size }, { productSize: size }];
                 filter.$and = [{ productCollection: { $ne: ProductCollection.SHOES } }];
             } else {
                 throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
@@ -143,6 +153,15 @@ class ProductService {
     }
 
     public async createNewProduct(input: ProductInput): Promise<Product> {
+        const sizes = normalizeSizes(input.productSizes);
+        const allowedSizes = input.productCollection === ProductCollection.SHOES ? shoeSizes : standardSizes;
+        if (!sizes.length || sizes.some(size => !allowedSizes.has(size))
+            || (sizes.includes(ProductSize.ONESIZE) && sizes.length !== 1)) {
+            throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+        }
+        input.productSizes = sizes as Array<ProductSize | ProductShoeSize>;
+        input.productSize = undefined;
+        input.productShoeSize = undefined;
         try {
             return await this.productModel.create(input);
         } catch (err) {

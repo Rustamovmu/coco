@@ -71,7 +71,8 @@
                   <span class="product-price">$<%= product.productPrice %></span>
                 </div>
                 <div class="product-meta">
-                  <span>Size <strong><%= product.productCollection === 'SHOES' ? product.productShoeSize : product.productSize %></strong></span>
+                  <% const displayedSizes = product.productSizes && product.productSizes.length ? product.productSizes : [product.productCollection === 'SHOES' ? product.productShoeSize : product.productSize].filter(Boolean); %>
+                  <span>Sizes <strong><%= displayedSizes.join(', ') || 'Not set' %></strong></span>
                   <span>In stock <strong><%= product.productLeftCount %></strong></span>
                 </div>
                 <% if (product.productDesc) { %>
@@ -129,24 +130,28 @@
                 <option value="OTHERS">Other</option>
               </select>
             </label>
-            <label class="form-field" id="product-size-field" for="product-size">
-              <span>Clothing size</span>
-              <select id="product-size" class="product-size" name="productSize">
-                <option value="S">S</option>
-                <option value="M" selected>M</option>
-                <option value="L">L</option>
-                <option value="XXL">XXL</option>
-                <option value="ONESIZE">One size</option>
-              </select>
-            </label>
-            <label class="form-field" id="product-shoe-size-field" for="product-shoe-size" hidden>
-              <span>Shoe size</span>
-              <select id="product-shoe-size" class="product-shoe-size" name="productShoeSize" disabled>
+            <fieldset class="form-field product-size-field" id="product-size-field">
+              <legend>Available sizes *</legend>
+              <div class="size-options" role="group" aria-label="Available standard sizes">
+                <% ['S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'ONESIZE'].forEach(function(size) { %>
+                  <label class="size-option">
+                    <input type="checkbox" name="productSizes" value="<%= size %>" <%= size === 'M' ? 'checked' : '' %> />
+                    <span><%= size === 'ONESIZE' ? 'One size' : size %></span>
+                  </label>
+                <% }); %>
+              </div>
+            </fieldset>
+            <fieldset class="form-field product-size-field" id="product-shoe-size-field" hidden>
+              <legend>Available shoe sizes *</legend>
+              <div class="size-options" role="group" aria-label="Available EU shoe sizes">
                 <% for (let size = 36; size <= 47; size++) { %>
-                  <option value="<%= size %>"><%= size %></option>
+                  <label class="size-option">
+                    <input type="checkbox" name="productSizes" value="<%= size %>" disabled />
+                    <span><%= size %></span>
+                  </label>
                 <% } %>
-              </select>
-            </label>
+              </div>
+            </fieldset>
           </div>
           <label class="form-field" for="product-desc">
             <span>Description</span>

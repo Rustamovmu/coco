@@ -2,8 +2,6 @@ $(function () {
     const collection = $("#product-collection"),
         clothingSizeField = $("#product-size-field"),
         shoeSizeField = $("#product-shoe-size-field"),
-        clothingSize = $("#product-size"),
-        shoeSize = $("#product-shoe-size"),
         formPanel = $("#product-form-panel"),
         openFormButton = $("#process-btn")
 
@@ -11,8 +9,10 @@ $(function () {
         const isShoe = collection.val() === "SHOES";
         clothingSizeField.prop("hidden", isShoe);
         shoeSizeField.prop("hidden", !isShoe);
-        clothingSize.prop("disabled", isShoe);
-        shoeSize.prop("disabled", !isShoe);
+        clothingSizeField.find('input[name="productSizes"]').prop("disabled", isShoe);
+        shoeSizeField.find('input[name="productSizes"]').prop("disabled", !isShoe);
+        const visibleSizes = (isShoe ? shoeSizeField : clothingSizeField).find('input[name="productSizes"]');
+        if (!visibleSizes.filter(":checked").length) visibleSizes.first().prop("checked", true);
     }
 
     function setProductFormOpen(isOpen) {
@@ -42,6 +42,14 @@ $(function () {
     }
 
     collection.on("change", updateSizeField);
+    clothingSizeField.on("change", 'input[name="productSizes"]', function () {
+        const oneSize = this.value === "ONESIZE";
+        if (oneSize && this.checked) {
+            clothingSizeField.find('input[name="productSizes"]').not(this).prop("checked", false);
+        } else if (this.checked) {
+            clothingSizeField.find('input[value="ONESIZE"]').prop("checked", false);
+        }
+    });
     updateSizeField();
 
     openFormButton.on("click", () => setProductFormOpen(formPanel.prop("hidden")));
@@ -114,6 +122,12 @@ $(function () {
 
 function validateForm() {
     const coverImage = document.querySelector(".product-image");
+    const selectedSizes = document.querySelectorAll('input[name="productSizes"]:checked:not(:disabled)');
+
+    if (!selectedSizes.length) {
+        alert("Please choose at least one available size.");
+        return false;
+    }
 
     if (!coverImage?.files?.length) {
         alert("Please add a cover image for the product.");
