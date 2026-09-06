@@ -1,10 +1,27 @@
 import { shapeIntoMongooseObjectid } from "../libs/config";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
-import { LoginInput, Member, MemberInput, MemberUpdateInput } from "../libs/types/member";
+import { AuthMember, LoginInput, Member, MemberInput, MemberProfileUpdateInput, MemberUpdateInput, PublicMember } from "../libs/types/member";
 import MemberModel from "../schema/Member.model";
 import * as bcrypt from "bcryptjs";
 import { FlattenMaps } from "mongoose";
+
+const publicMemberFields = "_id memberType memberNick memberImage memberDesc memberPoints";
+
+function validateMemberFields(input: MemberProfileUpdateInput, required: string[] = []): void {
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+        throw new Errors(HttpCode.BAD_REQUEST, Message.UPDATE_FAILED);
+    }
+    for (const field of ["memberNick", "memberPhone", "memberPassword", "memberAddress", "memberDesc", "memberImage"] as const) {
+        const value = input[field];
+        if (value === undefined && !required.includes(field)) continue;
+        if (typeof value !== "string" || value.length > (field === "memberDesc" ? 2000 : 500)
+            || ((required.includes(field) || ["memberNick", "memberPhone", "memberPassword"].includes(field)) && !value.trim())
+            || (field === "memberPassword" && Buffer.byteLength(value, "utf8") > 72)) {
+            throw new Errors(HttpCode.BAD_REQUEST, Message.UPDATE_FAILED);
+        }
+    }
+}
 
 class MemberService {
     private readonly memberModel = MemberModel;
@@ -17,11 +34,21 @@ class MemberService {
        // SPA
 
     public async signup(input: MemberInput): Promise<FlattenMaps<Member>> {
+        validateMemberFields(input, ["memberNick", "memberPhone", "memberPassword"]);
         const salt = await bcrypt.genSalt(10);
-        input.memberPassword = await bcrypt.hash(input.memberPassword, salt);
+        const memberPassword = await bcrypt.hash(input.memberPassword, salt);
 
         try {
-            const result = await this.memberModel.create(input);
+            const result = await this.memberModel.create({
+                memberNick: input.memberNick.trim(),
+                memberPhone: input.memberPhone.trim(),
+                memberPassword,
+                memberAddress: input.memberAddress,
+                memberDesc: input.memberDesc,
+                memberType: MemberType.USER,
+                memberStatus: MemberStatus.ACTIVE,
+                memberPoints: 0,
+            });
             result.memberPassword = undefined;
 
             return result.toJSON();
@@ -32,11 +59,11 @@ class MemberService {
     }
 
     public async login(input: LoginInput): Promise<Member> {
-        // consider member status in the future
+        validateMemberFields(input, ["memberNick", "memberPassword"]);
         const member = await this.memberModel
             .findOne(
                {
-                    memberNick: input.memberNick,
+                    memberNick: input.memberNick.trim(),
                     memberStatus: { $ne: MemberStatus.DELETE },
                 },
                 { memberNick: 1, memberPassword: 1, memberStatus: 1 })
@@ -64,6 +91,72 @@ class MemberService {
         }
         result.memberPassword = undefined;
         return result;
+    }
+
+    public async getAdmin(): Promise<PublicMember> {
+        const result = await this.memberModel
+            .findOne({ memberType: MemberType.ADMIN, memberStatus: MemberStatus.ACTIVE })
+            .select(publicMemberFields)
+            .lean<PublicMember>()
+            .exec();
+        if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+        return result;
+    }
+
+    public async getTopUsers(): Promise<PublicMember[]> {
+        return this.memberModel
+            .find({ memberType: MemberType.USER, memberStatus: MemberStatus.ACTIVE })
+            .select(publicMemberFields)
+            .sort({ memberPoints: -1, _id: 1 })
+            .limit(4)
+            .lean<PublicMember[]>()
+            .exec();
+    }
+
+    public async getMemberDetail(member?: AuthMember): Promise<Member> {
+        if (!member || !/^[a-f\d]{24}$/i.test(String(member._id))) {
+            throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
+        }
+        const result = await this.memberModel
+            .findOne({ _id: member._id, memberStatus: MemberStatus.ACTIVE })
+            .select("-memberPassword -__v")
+            .lean()
+            .exec();
+        if (!result) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
+        return result;
+    }
+
+    public async updateMember(member: AuthMember | undefined, input: MemberProfileUpdateInput): Promise<Member> {
+        if (!member || !/^[a-f\d]{24}$/i.test(String(member._id))) {
+            throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
+        }
+        validateMemberFields(input);
+        const update: MemberProfileUpdateInput = {};
+        for (const field of ["memberNick", "memberPhone", "memberAddress", "memberDesc", "memberImage"] as const) {
+            if (input[field] !== undefined) update[field] = input[field]!.trim();
+        }
+        if (input.memberPassword !== undefined) {
+            update.memberPassword = await bcrypt.hash(input.memberPassword, 10);
+        }
+        if (!Object.keys(update).length) throw new Errors(HttpCode.BAD_REQUEST, Message.UPDATE_FAILED);
+        try {
+            const result = await this.memberModel
+                .findOneAndUpdate(
+                    { _id: member._id, memberStatus: MemberStatus.ACTIVE },
+                    { $set: update },
+                    { new: true, runValidators: true }
+                )
+                .select("-memberPassword -__v")
+                .lean()
+                .exec();
+            if (!result) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
+            return result;
+        } catch (err) {
+            if ((err as { code?: number }).code === 11000) {
+                throw new Errors(HttpCode.BAD_REQUEST, Message.USED_NICK_PHONE);
+            }
+            throw err;
+        }
     }
 
     // SSR

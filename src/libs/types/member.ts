@@ -26,6 +26,20 @@ export interface AuthMember {
     memberNick: string;
 }
 
+export type PublicMember = Pick<
+    Member,
+    "_id" | "memberType" | "memberNick" | "memberImage" | "memberDesc" | "memberPoints"
+>;
+
+export interface MemberProfileUpdateInput {
+    memberNick?: string;
+    memberPhone?: string;
+    memberPassword?: string;
+    memberAddress?: string;
+    memberDesc?: string;
+    memberImage?: string;
+}
+
 export interface MemberInput {
     memberType?: MemberType;
     memberStatus?: MemberStatus;

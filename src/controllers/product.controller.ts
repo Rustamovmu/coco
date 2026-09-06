@@ -8,6 +8,24 @@ import { ProductInput } from "../libs/types/product";
 const productService = new ProductService();
 const productController: T = {};
 
+productController.getProducts = async (req: Request, res: Response) => {
+    try {
+        res.status(HttpCode.OK).json(await productService.getProducts(req.query));
+    } catch (err) {
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standart.code).json(Errors.standart);
+    }
+};
+
+productController.getProduct = async (req: Request, res: Response) => {
+    try {
+        res.status(HttpCode.OK).json(await productService.getProduct(req.params.id));
+    } catch (err) {
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standart.code).json(Errors.standart);
+    }
+};
+
 productController.getAllProducts = async (req: Request, res: Response) => {
     try {
         console.log("getAllProducts");
