@@ -24,8 +24,9 @@ router.post(
 );
 router.get("/member/top-users", memberController.getTopUsers);
 
-router.get("/product/all", productController.getProducts);
-router.get("/product/:id", productController.getProduct);
+router.get("/product/all", memberController.retrieveAuth, productController.getProducts);
+router.post("/product/:id/like", memberController.verifyAuth, productController.toggleLike);
+router.get("/product/:id", memberController.retrieveAuth, productController.getProduct);
 
 const handleApiError: ErrorRequestHandler = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {

@@ -1,9 +1,23 @@
 import { shapeIntoMongooseObjectid } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
-import { Product, ProductInput, ProductUpdateInput } from "../libs/types/product";
+import { Product, ProductInput, ProductResponse, ProductUpdateInput } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { ProductCollection, ProductShoeSize, ProductSize, ProductStatus } from "../libs/enums/product.enum";
+import { AuthMember } from "../libs/types/member";
+
+const isObjectId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+
+const shapeProductResponse = (product: Product, member?: AuthMember): ProductResponse => {
+    const raw = product as Product & { productLikedBy?: Types.ObjectId[] };
+    const { productLikedBy = [], ...publicProduct } = raw;
+    const memberId = member ? String(member._id) : "";
+    return {
+        ...publicProduct,
+        productLikes: productLikedBy.length,
+        isLiked: Boolean(memberId && productLikedBy.some(id => String(id) === memberId)),
+    } as ProductResponse;
+};
 
 class ProductService {
     private readonly productModel;
@@ -16,7 +30,7 @@ class ProductService {
 
     /** SPA */
 
-    public async getProducts(inquiry: Record<string, unknown>): Promise<Product[]> {
+    public async getProducts(inquiry: Record<string, unknown>, member?: AuthMember): Promise<ProductResponse[]> {
         const getString = (name: string, fallback = ""): string => {
             const value = inquiry[name];
             if (value === undefined) return fallback;
@@ -59,24 +73,52 @@ class ProductService {
                 throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
             }
         }
-        return this.productModel.find(filter)
+        const products = await this.productModel.find(filter)
             .select("-__v")
             .sort({ [order]: sort === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean()
             .exec();
+        return products.map(product => shapeProductResponse(product, member));
     }
 
-    public async getProduct(id: string): Promise<Product> {
-        if (!/^[a-f\d]{24}$/i.test(id)) throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+    public async getProduct(id: string, member?: AuthMember): Promise<ProductResponse> {
+        if (!isObjectId(id)) throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
         const result = await this.productModel
-            .findOne({ _id: id, productStatus: ProductStatus.PROCESS })
+            .findOneAndUpdate(
+                { _id: id, productStatus: ProductStatus.PROCESS },
+                { $inc: { productViews: 1 } },
+                { new: true }
+            )
             .select("-__v")
             .lean()
             .exec();
         if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-        return result;
+        return shapeProductResponse(result, member);
+    }
+
+    public async toggleLike(id: string, member?: AuthMember): Promise<{ isLiked: boolean; productLikes: number }> {
+        if (!member) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
+        if (!isObjectId(id)) throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+        const current = await this.productModel
+            .findOne({ _id: id, productStatus: ProductStatus.PROCESS })
+            .select("productLikedBy")
+            .lean()
+            .exec();
+        if (!current) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+        const isLiked = (current.productLikedBy ?? [])
+            .some(memberId => String(memberId) === String(member._id));
+        const update = isLiked
+            ? { $pull: { productLikedBy: member._id } }
+            : { $addToSet: { productLikedBy: member._id } };
+        const result = await this.productModel
+            .findOneAndUpdate({ _id: id, productStatus: ProductStatus.PROCESS }, update, { new: true })
+            .select("productLikedBy")
+            .lean()
+            .exec();
+        if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+        return { isLiked: !isLiked, productLikes: result.productLikedBy.length };
     }
 
     /** SSR */

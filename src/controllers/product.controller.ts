@@ -2,24 +2,33 @@ import { Request, Response } from "express";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import ProductService from "../models/Product.service";
 import { T } from "../libs/types/common";
-import { AdminRequest } from "../libs/types/member";
+import { AdminRequest, ExtendedRequest } from "../libs/types/member";
 import { ProductInput } from "../libs/types/product";
 
 const productService = new ProductService();
 const productController: T = {};
 
-productController.getProducts = async (req: Request, res: Response) => {
+productController.getProducts = async (req: ExtendedRequest, res: Response) => {
     try {
-        res.status(HttpCode.OK).json(await productService.getProducts(req.query));
+        res.status(HttpCode.OK).json(await productService.getProducts(req.query, req.member));
     } catch (err) {
         if (err instanceof Errors) res.status(err.code).json(err);
         else res.status(Errors.standart.code).json(Errors.standart);
     }
 };
 
-productController.getProduct = async (req: Request, res: Response) => {
+productController.getProduct = async (req: ExtendedRequest, res: Response) => {
     try {
-        res.status(HttpCode.OK).json(await productService.getProduct(req.params.id));
+        res.status(HttpCode.OK).json(await productService.getProduct(req.params.id, req.member));
+    } catch (err) {
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standart.code).json(Errors.standart);
+    }
+};
+
+productController.toggleLike = async (req: ExtendedRequest, res: Response) => {
+    try {
+        res.status(HttpCode.OK).json(await productService.toggleLike(req.params.id, req.member));
     } catch (err) {
         if (err instanceof Errors) res.status(err.code).json(err);
         else res.status(Errors.standart.code).json(Errors.standart);

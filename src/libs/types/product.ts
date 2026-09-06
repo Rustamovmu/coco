@@ -13,9 +13,15 @@ export interface Product {
     productDesc?: string;
     productImages: string[];
     productViews: number;
+    productLikedBy: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type ProductResponse = Omit<Product, "productLikedBy"> & {
+    productLikes: number;
+    isLiked: boolean;
+};
 
 export interface ProductInquiry {
     order: string;

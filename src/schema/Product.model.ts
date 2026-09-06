@@ -55,6 +55,11 @@ const productShema = new Schema<Product>(
             type: Number,
             default: 0,
         },
+
+        productLikedBy: {
+            type: [{ type: Schema.Types.ObjectId, ref: "Members" }],
+            default: [],
+        },
     },
     { timestamps: true }
 );
