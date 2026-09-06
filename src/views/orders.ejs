@@ -1,0 +1,49 @@
+<%- include('includes/header') %>
+<link rel="stylesheet" type="text/css" href="/css/orders.css" />
+<body>
+  <main class="orders-container">
+    <nav class="navigation-menu" aria-label="Admin navigation">
+      <ul class="nav justify-content-center">
+        <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/product/all">Products</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/admin/order/all">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/user/all">Users</a></li>
+        <li class="nav-item" onclick="return confirm('Do you really want to logout?')"><a class="nav-link" href="/admin/logout">Logout</a></li>
+      </ul>
+    </nav>
+    <section class="orders-dashboard" aria-labelledby="orders-title">
+      <header class="orders-header">
+        <div><p class="eyebrow">COCO FULFILMENT</p><h1 id="orders-title">Manage customer orders.</h1><p>Advance confirmed orders as they are prepared, dispatched, and delivered.</p></div>
+        <span><%= orders.length %> <%= orders.length === 1 ? 'order' : 'orders' %></span>
+      </header>
+      <nav class="status-filters" aria-label="Filter orders by status">
+        <% ['ALL', 'PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].forEach(function(status) { %>
+          <a class="<%= selectedStatus === status ? 'active' : '' %>" href="/admin/order/all<%= status === 'ALL' ? '' : '?orderStatus=' + status %>"><%= status %></a>
+        <% }); %>
+      </nav>
+      <% if (!orders.length) { %><section class="empty-orders"><h2>No orders found.</h2><p>Orders matching this status will appear here.</p></section><% } %>
+      <div class="order-grid">
+        <% const nextStatus = { PAID: 'PROCESSING', PROCESSING: 'SHIPPED', SHIPPED: 'DELIVERED' }; %>
+        <% const nextLabel = { PROCESSING: 'Start preparing', SHIPPED: 'Mark dispatched', DELIVERED: 'Mark delivered' }; %>
+        <% orders.forEach(function(order) { %>
+          <article class="order-card" data-order-id="<%= order._id %>">
+            <header><div><p>Order #<%= String(order._id).slice(-8).toUpperCase() %></p><time><%= new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) %></time></div><span class="status status--<%= order.orderStatus.toLowerCase() %>"><%= order.orderStatus %></span></header>
+            <section class="customer"><div><strong><%= order.memberId ? order.memberId.memberNick : 'Deleted member' %></strong><span><%= order.memberId ? order.memberId.memberPhone : 'Unavailable' %></span></div><address><%= order.shippingAddress %></address></section>
+            <div class="order-items">
+              <% order.orderItems.forEach(function(item) { %>
+                <div class="order-item">
+                  <% if (item.productImage) { %><img src="<%= /^https?:\/\//.test(item.productImage) ? item.productImage : '/' + item.productImage.replace(/^\//, '') %>" alt="" /><% } else { %><div class="item-placeholder"><%= item.productName.charAt(0) %></div><% } %>
+                  <div><strong><%= item.productName %></strong><span><%= [item.selectedColor, item.selectedSize, 'Qty ' + item.quantity].filter(Boolean).join(' · ') %></span></div>
+                  <b>$<%= (item.unitPrice * item.quantity).toFixed(2) %></b>
+                </div>
+              <% }); %>
+            </div>
+            <footer><div><span>Subtotal $<%= order.orderSubtotal.toFixed(2) %></span><span>Delivery $<%= order.orderShippingFee.toFixed(2) %></span><strong>Total $<%= order.orderTotal.toFixed(2) %></strong></div><% if (nextStatus[order.orderStatus]) { %><button type="button" class="advance-order" data-next-status="<%= nextStatus[order.orderStatus] %>"><%= nextLabel[nextStatus[order.orderStatus]] %></button><% } %></footer>
+          </article>
+        <% }); %>
+      </div>
+    </section>
+  </main>
+  <script src="/js/orders.js"></script>
+</body>
+</html>

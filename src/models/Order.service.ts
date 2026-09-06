@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { OrderStatus } from "../libs/enums/order.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { AuthMember } from "../libs/types/member";
-import { Order, OrderItemInput, OrderUpdateInput } from "../libs/types/order";
+import { AdminOrder, Order, OrderItemInput, OrderUpdateInput } from "../libs/types/order";
 import MemberModel from "../schema/Member.model";
 import OrderModel from "../schema/Order.model";
 import ProductModel from "../schema/Product.model";
@@ -11,6 +11,12 @@ import { ProductStatus } from "../libs/enums/product.enum";
 const objectIdPattern = /^[a-f\d]{24}$/i;
 
 class OrderService {
+    private readonly adminTransitions: Partial<Record<OrderStatus, OrderStatus>> = {
+        [OrderStatus.PAID]: OrderStatus.PROCESSING,
+        [OrderStatus.PROCESSING]: OrderStatus.SHIPPED,
+        [OrderStatus.SHIPPED]: OrderStatus.DELIVERED,
+    };
+
     public async createOrder(member: AuthMember | undefined, input: unknown): Promise<Order> {
         if (!member) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
         if (!Array.isArray(input) || input.length < 1 || input.length > 50) {
@@ -122,6 +128,35 @@ class OrderService {
                 updateOne: { filter: { _id: item.productId }, update: { $inc: { productLeftCount: item.quantity } } },
             })) as any);
         }
+        return result;
+    }
+
+    public async getAllOrders(status?: unknown): Promise<AdminOrder[]> {
+        if (status !== undefined && (typeof status !== "string" || !Object.values(OrderStatus).includes(status as OrderStatus))) {
+            throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_ORDER);
+        }
+        const filter = status ? { orderStatus: status as OrderStatus } : {};
+        const orders = await OrderModel.find(filter)
+            .populate("memberId", "memberNick memberPhone memberAddress")
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+        return orders as unknown as AdminOrder[];
+    }
+
+    public async updateOrderByAdmin(orderId: string, nextStatus: OrderStatus): Promise<Order> {
+        if (!objectIdPattern.test(orderId) || !Object.values(OrderStatus).includes(nextStatus)) {
+            throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_ORDER);
+        }
+        const allowedCurrentStatus = Object.entries(this.adminTransitions)
+            .find(([, allowedNext]) => allowedNext === nextStatus)?.[0] as OrderStatus | undefined;
+        if (!allowedCurrentStatus) throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_ORDER);
+        const result = await OrderModel.findOneAndUpdate(
+            { _id: orderId, orderStatus: allowedCurrentStatus },
+            { $set: { orderStatus: nextStatus } },
+            { new: true }
+        ).lean().exec();
+        if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
         return result;
     }
 }

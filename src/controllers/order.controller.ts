@@ -34,4 +34,24 @@ orderController.updateOrder = async (req: ExtendedRequest, res: Response) => {
     }
 };
 
+orderController.getAdminOrders = async (req: ExtendedRequest, res: Response) => {
+    try {
+        const orders = await orderService.getAllOrders(req.query.orderStatus);
+        res.render("orders", { orders, selectedStatus: req.query.orderStatus || "ALL" });
+    } catch (err) {
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standart.code).json(Errors.standart);
+    }
+};
+
+orderController.updateAdminOrder = async (req: ExtendedRequest, res: Response) => {
+    try {
+        const order = await orderService.updateOrderByAdmin(req.params.id, req.body.orderStatus);
+        res.status(HttpCode.OK).json({ data: order });
+    } catch (err) {
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standart.code).json(Errors.standart);
+    }
+};
+
 export default orderController;

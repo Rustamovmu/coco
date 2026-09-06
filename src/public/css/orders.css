@@ -1,0 +1,31 @@
+:root { --ink:#211e1a; --paper:#f5f1ea; --muted:#81786e; --line:#ded5c8; --accent:#9a6739; }
+.orders-container { background:var(--paper); color:var(--ink); min-height:100vh; padding:28px 5vw 80px; }
+.orders-container .navigation-menu { font-family:monospace; margin-bottom:clamp(42px,7vw,82px); }
+.orders-container .nav-link { color:#4c4138; font-size:.92rem; letter-spacing:.04em; text-transform:uppercase; }
+.orders-container .nav-link:hover,.orders-container .nav-link.active { color:#8d4b1b; }
+.orders-dashboard { margin:auto; width:min(1180px,100%); }
+.orders-header { align-items:flex-end; display:flex; gap:24px; justify-content:space-between; margin-bottom:30px; }
+.eyebrow { color:#8d4b1b; font-size:.72rem; font-weight:800; letter-spacing:.16em; margin:0 0 10px; }
+.orders-header h1 { font-family:Georgia,serif; font-size:clamp(2.5rem,5vw,4.6rem); letter-spacing:-.05em; line-height:.95; margin:0; }
+.orders-header p:not(.eyebrow) { color:var(--muted); margin:16px 0 0; }
+.orders-header > span { color:var(--muted); white-space:nowrap; }
+.status-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+.status-filters a { background:#fffaf4; border:1px solid var(--line); color:#65594e; font-size:.72rem; font-weight:700; padding:8px 12px; text-decoration:none; }
+.status-filters a.active,.status-filters a:hover { background:var(--ink); border-color:var(--ink); color:#fff; }
+.order-grid { display:grid; gap:20px; }
+.order-card,.empty-orders { background:#fffdf9; border:1px solid var(--line); box-shadow:0 10px 25px rgba(72,50,31,.05); }
+.empty-orders { padding:60px; text-align:center; }
+.empty-orders h2 { font-family:Georgia,serif; }
+.order-card > header { align-items:center; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; padding:20px 24px; }
+.order-card header p { font-family:Georgia,serif; font-size:1.15rem; margin:0; }
+.order-card time { color:var(--muted); font-size:.78rem; }
+.status { font-size:.7rem; font-weight:800; letter-spacing:.07em; padding:8px 11px; }
+.status--pending { background:#f4e7d2; color:#7b572f; }.status--paid,.status--processing { background:#e8e5df; color:#403a33; }.status--shipped { background:#dce7ee; color:#315c75; }.status--delivered { background:#dce9d7; color:#41613a; }.status--cancelled { background:#f1dddd; color:#843d3d; }
+.customer { align-items:start; background:#faf7f2; border-bottom:1px solid var(--line); display:grid; gap:20px; grid-template-columns:1fr 1fr; padding:15px 24px; }
+.customer div { display:flex; flex-direction:column; }.customer span,.customer address { color:var(--muted); font-size:.8rem; font-style:normal; margin:0; }
+.order-items { padding:0 24px; }.order-item { align-items:center; border-bottom:1px solid #eee7de; display:grid; gap:16px; grid-template-columns:58px 1fr auto; padding:15px 0; }.order-item:last-child { border:0; }
+.order-item img,.item-placeholder { background:#eee8df; height:64px; object-fit:cover; width:58px; }.item-placeholder { align-items:center; display:flex; font-family:Georgia,serif; font-size:1.5rem; justify-content:center; }
+.order-item div:nth-child(2) { display:flex; flex-direction:column; }.order-item span { color:var(--muted); font-size:.78rem; margin-top:4px; }.order-item b { font-family:Georgia,serif; }
+.order-card > footer { align-items:center; background:#faf7f2; border-top:1px solid var(--line); display:flex; justify-content:space-between; padding:16px 24px; }.order-card footer div { display:flex; flex-wrap:wrap; gap:16px; }.order-card footer span { color:var(--muted); font-size:.78rem; }.order-card footer strong { font-family:Georgia,serif; }
+.advance-order { background:var(--ink); border:0; color:#fff; cursor:pointer; font-size:.75rem; font-weight:800; padding:11px 16px; text-transform:uppercase; }.advance-order:disabled { cursor:wait; opacity:.55; }
+@media(max-width:650px){.orders-container{padding:20px 16px 48px}.orders-header,.order-card>footer{align-items:flex-start;flex-direction:column}.customer{grid-template-columns:1fr}.order-card>header,.customer,.order-items,.order-card>footer{padding-left:16px;padding-right:16px}.order-item{grid-template-columns:48px 1fr auto}.order-item img,.item-placeholder{height:54px;width:48px}}

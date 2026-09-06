@@ -36,3 +36,12 @@ export interface OrderUpdateInput {
     orderId: string;
     orderStatus: OrderStatus;
 }
+
+export interface AdminOrder extends Omit<Order, "memberId"> {
+    memberId: {
+        _id: Types.ObjectId;
+        memberNick: string;
+        memberPhone: string;
+        memberAddress?: string;
+    } | null;
+}
