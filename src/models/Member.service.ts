@@ -1,8 +1,10 @@
 import { shapeIntoMongooseObjectid } from "../libs/config";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
-import { AuthMember, LoginInput, Member, MemberInput, MemberProfileUpdateInput, MemberUpdateInput, PublicMember } from "../libs/types/member";
+import { AuthMember, LoginInput, Member, MemberInput, MemberProfileUpdateInput, MemberUpdateInput, PublicMember, TopMember } from "../libs/types/member";
 import MemberModel from "../schema/Member.model";
+import OrderModel from "../schema/Order.model";
+import { OrderStatus } from "../libs/enums/order.enum";
 import * as bcrypt from "bcryptjs";
 import { FlattenMaps } from "mongoose";
 
@@ -103,14 +105,61 @@ class MemberService {
         return result;
     }
 
-    public async getTopUsers(): Promise<PublicMember[]> {
-        return this.memberModel
-            .find({ memberType: MemberType.USER, memberStatus: MemberStatus.ACTIVE })
-            .select(publicMemberFields)
-            .sort({ memberPoints: -1, _id: 1 })
-            .limit(4)
-            .lean<PublicMember[]>()
-            .exec();
+    public async getTopUsers(): Promise<TopMember[]> {
+        const rankedMembers = await this.memberModel.aggregate<Omit<TopMember, "rank">>([
+            { $match: { memberType: MemberType.USER, memberStatus: MemberStatus.ACTIVE } },
+            { $lookup: {
+                from: OrderModel.collection.name,
+                localField: "_id",
+                foreignField: "memberId",
+                as: "orders",
+            } },
+            { $unwind: { path: "$orders", preserveNullAndEmptyArrays: true } },
+            { $set: {
+                isQualifyingStatus: { $in: ["$orders.orderStatus", [OrderStatus.PAID, OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]] },
+                grossCents: { $round: [{ $multiply: [{ $max: [{ $convert: { input: "$orders.orderTotal", to: "double", onError: 0, onNull: 0 } }, 0] }, 100] }, 0] },
+                refundCents: { $round: [{ $multiply: [{ $max: [{ $convert: { input: "$orders.refundedAmount", to: "double", onError: 0, onNull: 0 } }, 0] }, 100] }, 0] },
+            } },
+            { $set: {
+                countsAsPurchase: { $and: [
+                    "$isQualifyingStatus",
+                    { $or: [{ $eq: ["$refundCents", 0] }, { $lt: ["$refundCents", "$grossCents"] }] },
+                ] },
+            } },
+            { $group: {
+                _id: "$_id",
+                memberType: { $first: "$memberType" },
+                memberNick: { $first: "$memberNick" },
+                memberImage: { $first: "$memberImage" },
+                memberDesc: { $first: "$memberDesc" },
+                memberPoints: { $first: "$memberPoints" },
+                purchaseCount: { $sum: { $cond: ["$countsAsPurchase", 1, 0] } },
+                productsBought: { $sum: { $cond: ["$countsAsPurchase", { $sum: { $ifNull: ["$orders.orderItems.quantity", []] } }, 0] } },
+                totalSpentCents: { $sum: { $cond: ["$countsAsPurchase", { $max: [{ $subtract: ["$grossCents", "$refundCents"] }, 0] }, 0] } },
+            } },
+            { $sort: { purchaseCount: -1, totalSpentCents: -1, memberNick: 1, _id: 1 } },
+            { $project: {
+                _id: 1,
+                memberType: 1,
+                memberNick: 1,
+                memberImage: 1,
+                memberDesc: 1,
+                memberPoints: 1,
+                purchaseCount: 1,
+                productsBought: 1,
+                totalSpent: { $divide: ["$totalSpentCents", 100] },
+            } },
+        ]).exec();
+
+        let rank = 0;
+        let previous: Pick<TopMember, "purchaseCount" | "totalSpent"> | undefined;
+        return rankedMembers.map((member, index) => {
+            if (!previous || previous.purchaseCount !== member.purchaseCount || previous.totalSpent !== member.totalSpent) {
+                rank = index + 1;
+            }
+            previous = member;
+            return { ...member, rank };
+        });
     }
 
     public async getMemberDetail(member?: AuthMember): Promise<Member> {

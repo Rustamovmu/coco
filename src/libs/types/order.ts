@@ -26,6 +26,7 @@ export interface Order {
     orderSubtotal: number;
     orderShippingFee: number;
     orderTotal: number;
+    refundedAmount?: number;
     shippingAddress: string;
     orderItems: OrderItem[];
     createdAt: Date;

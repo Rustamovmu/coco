@@ -18,6 +18,7 @@ const OrderSchema = new Schema<Order>({
     orderSubtotal: { type: Number, required: true, min: 0 },
     orderShippingFee: { type: Number, required: true, min: 0 },
     orderTotal: { type: Number, required: true, min: 0 },
+    refundedAmount: { type: Number, default: 0, min: 0 },
     shippingAddress: { type: String, required: true },
     orderItems: { type: [OrderItemSchema], required: true },
 }, { timestamps: true });

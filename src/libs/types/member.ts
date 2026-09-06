@@ -31,6 +31,13 @@ export type PublicMember = Pick<
     "_id" | "memberType" | "memberNick" | "memberImage" | "memberDesc" | "memberPoints"
 >;
 
+export type TopMember = PublicMember & {
+    rank: number;
+    purchaseCount: number;
+    productsBought: number;
+    totalSpent: number;
+};
+
 export interface MemberProfileUpdateInput {
     memberNick?: string;
     memberPhone?: string;
