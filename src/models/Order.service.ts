@@ -107,18 +107,21 @@ class OrderService {
 
     public async updateOrder(member: AuthMember | undefined, input: OrderUpdateInput): Promise<Order> {
         if (!member) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHORIZED);
-        if (!input || !objectIdPattern.test(input.orderId) || input.orderStatus !== OrderStatus.CANCELLED) {
+        if (!input || !objectIdPattern.test(input.orderId)
+            || ![OrderStatus.PAID, OrderStatus.CANCELLED].includes(input.orderStatus)) {
             throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_ORDER);
         }
         const result = await OrderModel.findOneAndUpdate(
             { _id: input.orderId, memberId: member._id, orderStatus: OrderStatus.PENDING },
-            { $set: { orderStatus: OrderStatus.CANCELLED } },
+            { $set: { orderStatus: input.orderStatus } },
             { new: true }
         ).lean().exec();
         if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-        await ProductModel.bulkWrite(result.orderItems.map(item => ({
-            updateOne: { filter: { _id: item.productId }, update: { $inc: { productLeftCount: item.quantity } } },
-        })) as any);
+        if (input.orderStatus === OrderStatus.CANCELLED) {
+            await ProductModel.bulkWrite(result.orderItems.map(item => ({
+                updateOne: { filter: { _id: item.productId }, update: { $inc: { productLeftCount: item.quantity } } },
+            })) as any);
+        }
         return result;
     }
 }
