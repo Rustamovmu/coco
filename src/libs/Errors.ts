@@ -14,6 +14,9 @@ export enum Message {
     NO_DATA_FOUND = "No data found",
     CREATE_FAILED = "Create failed",
     UPDATE_FAILED = "Update failed",
+    INVALID_ORDER = "Invalid order",
+    INSUFFICIENT_STOCK = "Some products do not have enough stock",
+    DELIVERY_ADDRESS_REQUIRED = "Add a delivery address to your profile before checkout",
 
     USED_NICK_PHONE = "Nickname or phone number already in use!",
     NO_MEMBER_NICK = "No member with this nickname!",

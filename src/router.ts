@@ -5,6 +5,7 @@ import productController from "./controllers/product.controller";
 import makeUploader from "./libs/utils/uploader";
 import multer from "multer";
 import Errors, { HttpCode } from "./libs/Errors";
+import orderController from "./controllers/order.controller";
 
 // Keep the existing authentication URLs for current clients.
 router.post("/signup", memberController.signup);
@@ -27,6 +28,10 @@ router.get("/member/top-users", memberController.getTopUsers);
 router.get("/product/all", memberController.retrieveAuth, productController.getProducts);
 router.post("/product/:id/like", memberController.verifyAuth, productController.toggleLike);
 router.get("/product/:id", memberController.retrieveAuth, productController.getProduct);
+
+router.post("/order/create", memberController.verifyAuth, orderController.createOrder);
+router.get("/order/all", memberController.verifyAuth, orderController.getMyOrders);
+router.post("/order/update", memberController.verifyAuth, orderController.updateOrder);
 
 const handleApiError: ErrorRequestHandler = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
