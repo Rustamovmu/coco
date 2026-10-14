@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "date": "2026-10-15",
+  "assets": [
+    {
+      "localFilename": "coco-admin-boutique.webp",
+      "localPath": "/media/images/banners/coco-admin-boutique.webp",
+      "repositoryPath": "src/public/media/images/banners/coco-admin-boutique.webp",
+      "originalSourceUrl": "https://images.pexels.com/photos/8346041/pexels-photo-8346041.jpeg?w=1000",
+      "sourcePage": "https://www.pexels.com/photo/clothes-hanging-on-the-rack-8346041/",
+      "provider": "Pexels",
+      "creator": "Ron Lach",
+      "license": "Pexels License",
+      "licenseReference": "https://www.pexels.com/license/",
+      "licenseVerifiedDate": "2026-10-15",
+      "attributionRequired": false,
+      "downloadDate": "2026-10-15",
+      "intendedUse": "Admin home editorial illustration, not merchant product imagery",
+      "originalBytes": 42441,
+      "optimizedBytes": 10674,
+      "width": 800,
+      "height": 800,
+      "optimization": "Centered square crop; WebP quality 82; metadata stripped",
+      "sha256": "f8b227829b37e250bcdc1ab31ba14349fd95d0e01690afbb8f9d4f1ba61760e8",
+      "restrictions": "No implied brand endorsement, stock-platform redistribution or resale as unaltered prints."
+    }
+  ],
+  "preserved": "The former src/public/img/coco-fashion-hero.png remains on disk for review; its licensing provenance is undocumented. It is no longer displayed. All merchant and member uploads remain unchanged."
+}

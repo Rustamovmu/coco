@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/server.ts",
     "start:dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-static.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "M.U",
