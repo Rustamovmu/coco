@@ -97,6 +97,8 @@
 }
 
 .fashion-hero-frame {
+  width: min(100%, 373.333px, 43.333vh);
+  justify-self: center;
   overflow: hidden;
   border: 1px solid rgba(236, 214, 174, 0.26);
   border-radius: 20px;
@@ -107,8 +109,8 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
 }
 
 @media (max-width: 760px) {

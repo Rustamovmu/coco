@@ -3,6 +3,8 @@ dist
 
 .env
 
+.env.production
+
 uploads
 
 AGENTS.md
